@@ -14,7 +14,6 @@ class axi_base_test extends uvm_test;
         uvm_top.print_topology();
     endfunction
 	task run_phase(uvm_phase phase);
-		//drain time ..need to add here
 		//phase.set_drain_time(this,100ns);
 		phase.phase_done.set_drain_time(this,100ns);
     endtask
@@ -23,7 +22,7 @@ endclass
 
 
 
-class axi_random_test extends axi_base_test;//............................working..need to find bugs
+class axi_random_test extends axi_base_test;
     `uvm_component_utils(axi_random_test)
     function new(string name = "axi_random_test",uvm_component parent = null);
         super.new(name, parent);
@@ -40,7 +39,7 @@ endclass
 
 
 
-class axi_aw_before_w_test extends axi_base_test;//............................working..need to find bugs
+class axi_aw_before_w_test extends axi_base_test;
     `uvm_component_utils(axi_aw_before_w_test)
     function new(string name = "axi_aw_before_w_test",uvm_component parent = null);
         super.new(name, parent);
@@ -56,7 +55,7 @@ endclass
 
 
 
-class axi_w_before_aw_test extends axi_base_test;//............................working..need to find bugs
+class axi_w_before_aw_test extends axi_base_test;
     `uvm_component_utils(axi_w_before_aw_test)
     function new(string name = "axi_w_before_aw_test",uvm_component parent = null);
         super.new(name, parent);
@@ -71,7 +70,7 @@ class axi_w_before_aw_test extends axi_base_test;//............................w
 endclass
 
 
-class axi_aw_w_same_cycle_test extends axi_base_test;//...............................working..need to find bugs
+class axi_aw_w_same_cycle_test extends axi_base_test;
     `uvm_component_utils(axi_aw_w_same_cycle_test)
     function new(string name = "axi_aw_w_same_cycle_test",uvm_component parent = null);
         super.new(name, parent);
@@ -87,7 +86,7 @@ endclass
 
 
 
-class axi_read_test extends axi_base_test;//...................................working..need to find bugs
+class axi_read_test extends axi_base_test;
     `uvm_component_utils(axi_read_test)
     function new(string name = "axi_read_test",uvm_component parent = null);
         super.new(name, parent);
@@ -113,7 +112,7 @@ endclass
 
 
 
-class axi_simultaneous_read_write_test extends axi_base_test;//...................................................hanging..need to check again
+class axi_simultaneous_read_write_test extends axi_base_test;
     `uvm_component_utils(axi_simultaneous_read_write_test)
     function new(string name = "axi_simultaneous_read_write_test",uvm_component parent = null);
         super.new(name, parent);
@@ -126,6 +125,7 @@ class axi_simultaneous_read_write_test extends axi_base_test;//.................
         phase.drop_objection(this);
     endtask
 endclass
+
 
 
 class axi_read_write_only_test extends axi_base_test;
@@ -141,6 +141,7 @@ class axi_read_write_only_test extends axi_base_test;
 		phase.drop_objection(this);
 	endtask
 endclass
+
 
 
 class axi_write_read_only_test extends axi_base_test;
@@ -173,6 +174,21 @@ class axi_unaligned_read_test extends axi_base_test;
 	endtask
 endclass
 
+class axi_unaligned_write_test extends axi_base_test;
+	`uvm_component_utils(axi_unaligned_write_test)
+	function new(string name="axi_unaligned_write_test",uvm_component parent=null);
+		super.new(name,parent);
+	endfunction
+	task run_phase(uvm_phase phase);
+		axi_unaligned_write_sequence seq;
+		phase.raise_objection(this);
+		seq=axi_unaligned_write_sequence::type_id::create("seq");
+		seq.start(env.active_agent.seqr);
+		phase.drop_objection(this);
+	endtask
+endclass
+
+
 class axi_invalid_read_test extends axi_base_test;
 	`uvm_component_utils(axi_invalid_read_test)
 	function new(string name="axi_invalid_read_test",uvm_component parent=null);
@@ -189,23 +205,7 @@ class axi_invalid_read_test extends axi_base_test;
 endclass
 
 
-class axi_unaligned_write_test extends axi_base_test;//...............................working..need to find bugs
-	`uvm_component_utils(axi_unaligned_write_test)
-	function new(string name="axi_unaligned_write_test",uvm_component parent=null);
-		super.new(name,parent);
-	endfunction
-	task run_phase(uvm_phase phase);
-		axi_unaligned_write_sequence seq;
-		phase.raise_objection(this);
-		seq=axi_unaligned_write_sequence::type_id::create("seq");
-		seq.start(env.active_agent.seqr);
-		phase.drop_objection(this);
-	endtask
-endclass
-
-
-
-class axi_invalid_write_test extends axi_base_test;//...............................working..need to find bugs
+class axi_invalid_write_test extends axi_base_test;
 	`uvm_component_utils(axi_invalid_write_test)
 	function new(string name="axi_invalid_write_test",uvm_component parent=null);
 		super.new(name,parent);
@@ -234,26 +234,25 @@ class axi_backpressure_test extends axi_base_test;
 endclass
 
 
-
 class axi_regression_test extends axi_base_test;
 	`uvm_component_utils(axi_regression_test)
 	function new(string name="axi_regression_test",uvm_component parent=null);
 		super.new(name,parent);
 	endfunction
 	task run_phase(uvm_phase phase);
-		axi_aw_before_w_sequence		aw_before_w_seq;
-		axi_w_before_aw_sequence		w_before_aw_seq;
-		axi_rd_sequence				rd_seq;
-		axi_aw_w_same_cycle_sequence		aw_w_same_cycle_seq;
+		axi_aw_before_w_sequence				aw_before_w_seq;
+		axi_w_before_aw_sequence				w_before_aw_seq;
+		axi_rd_sequence							rd_seq;
+		axi_aw_w_same_cycle_sequence			aw_w_same_cycle_seq;
 		axi_simultaneous_read_write_sequence	simultaneous_rw_seq;
-		axi_read_write_only_sequence		read_write_only_seq;
-		axi_write_read_only_sequence		write_read_only_seq;
-		axi_unaligned_write_sequence		unaligned_write_seq;
-		axi_unaligned_read_sequence		unaligned_read_seq;
-		axi_invalid_write_sequence		invalid_write_seq;
-		axi_invalid_read_sequence		invalid_read_seq;
-		axi_backpressure_sequence		backpressure_seq;
-		axi_random_sequence			random_seq;
+		axi_read_write_only_sequence			read_write_only_seq;
+		axi_write_read_only_sequence			write_read_only_seq;
+		axi_unaligned_write_sequence			unaligned_write_seq;
+		axi_unaligned_read_sequence				unaligned_read_seq;
+		axi_invalid_write_sequence				invalid_write_seq;
+		axi_invalid_read_sequence				invalid_read_seq;
+		axi_backpressure_sequence				backpressure_seq;
+		axi_random_sequence						random_seq;
 
 		phase.raise_objection(this);
 
