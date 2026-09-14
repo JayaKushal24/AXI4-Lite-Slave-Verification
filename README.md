@@ -148,5 +148,5 @@ The spreadsheet contains:
 
 Bugs identified during verification, along with their corresponding testcases, expected behavior, actual behavior, and resolution status, are maintained in the verification spreadsheet.
 
-[View Bugs and Issues](https://docs.google.com/spreadsheets/d/1aQTMho6oIKNgG4wNI7vniughK9QKUT41/edit?gid=442479963#gid=442479963)
+[View Bugs and Issues](https://docs.google.com/spreadsheets/d/1aQTMho6oIKNgG4wNI7vniughK9QKUT41/edit?gid=1294087543#gid=1294087543)
 
