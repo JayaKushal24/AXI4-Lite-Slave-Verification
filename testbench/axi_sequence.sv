@@ -21,7 +21,7 @@ class axi_aw_before_w_sequence extends axi_base_sequence;
 			start_item(req);//AW signals
 			assert(req.randomize(AWADDR,AWPROT,AWVALID,WVALID,BREADY)with{
 				AWVALID==1;WVALID==0;BREADY==0;
-				AWADDR dist {[8'h00:8'h27]:/40,[8'h28:8'h33]:/15,[8'h34:8'h3F]:/40,[8'h40:8'hFF]:/15};
+				AWADDR dist {[8'h00:8'h27]:/15,[8'h28:8'h33]:/35,[8'h34:8'h3F]:/15,[8'h40:8'hFF]:/35};
 				AWADDR[1:0]==2'b00;
 			});
 			finish_item(req);
@@ -37,8 +37,8 @@ class axi_aw_before_w_sequence extends axi_base_sequence;
 				assert(req.randomize(AWVALID,WVALID,AWADDR)with{
 					AWVALID==0;
 					WVALID==0;
-					AWADDR dist {[8'h00:8'h27]:/40,[8'h28:8'h33]:/15,[8'h34:8'h3F]:/40,[8'h40:8'hFF]:/15};
-					AWADDR[1:0]!=2'b00;
+					AWADDR dist {[8'h00:8'h27]:/20,[8'h28:8'h33]:/35,[8'h34:8'h3F]:/20,[8'h40:8'hFF]:/25};
+					AWADDR[1:0]==2'b00;
 				});
 				finish_item(req);
 				get_response(rsp);
@@ -55,7 +55,7 @@ class axi_aw_before_w_sequence extends axi_base_sequence;
 			end
 			
 			start_item(req);
-			assert(req.randomize(AWVALID,WVALID,BREADY,AWADDR,AWPROT)with{AWVALID==0;WVALID==0;BREADY==1;});
+			assert(req.randomize(AWVALID,WVALID,BREADY)with{AWVALID==0;WVALID==0;BREADY==1;});
 			finish_item(req);
 			get_response(rsp);
 			while(!(rsp.BVALID&&rsp.BREADY))begin

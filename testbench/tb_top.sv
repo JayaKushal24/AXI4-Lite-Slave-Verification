@@ -62,6 +62,9 @@ module tb_top;
 
         run_test();
     end
-
+	initial begin
+		    $fsdbDumpfile("wave.fsdb");
+		    $fsdbDumpvars(0, tb_top);
+	end
 endmodule
 

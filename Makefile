@@ -1,8 +1,8 @@
 TEST?=axi_aw_before_w_test
 
 clean:
-	rm -rf *.rc work csrc  vdCovLog coverage_report  simv.daidir *.conf
-	rm -rf transcript compile.log simv.vdb ucli.key vc_hdrs.h simv sim.log
+	rm -rf verdiLog *.rc *.fsdb *.log  work csrc  vdCovLog coverage_report simv.daidir *.conf
+	rm -rf transcript simv.vdb ucli.key vc_hdrs.h simv
 	clear
 
 compile:
@@ -18,6 +18,12 @@ vcs_run:
 
 
 vcs_all:
-	vcs -full64 -sverilog -ntb_opts uvm -licqueue -cm line+cond+fsm+tgl+branch+assert -assert enable_diag +incdir+./testbench  ./testbench/axi_pkg.sv ./testbench/tb_top.sv -l compile.log
+	vcs -full64 -sverilog -ntb_opts uvm -licqueue -debug_access+all -P ${VERDI_HOME}/share/PLI/VCS/LINUX64/novas.tab ${VERDI_HOME}/share/PLI/VCS/LINUX64/pli.a -cm line+cond+fsm+tgl+branch+assert -assert enable_diag +incdir+./testbench ./testbench/axi_pkg.sv ./testbench/tb_top.sv -l compile.log
 	./simv -cm line+cond+fsm+tgl+branch+assert +UVM_TESTNAME=$(TEST) -l simulation.log
 	urg -dir simv.vdb -report coverage_report
+
+view_cov:
+	verdi -cov simv.vdb/
+
+view_wave:
+	verdi -ssf ./wave.fsdb & 

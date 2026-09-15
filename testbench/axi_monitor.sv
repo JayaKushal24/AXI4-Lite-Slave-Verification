@@ -55,7 +55,7 @@ class axi_monitor extends uvm_monitor;
 			req.RRESP  = vif.mon_cb.RRESP;
 			ap.write(req);
 			`uvm_info(get_full_name(),
-			  $sformatf("@%0t: ARESETn=%0b | AWVALID=%0b AWREADY=%0b AWADDR=%0h AWPROT=%0b | WVALID=%0b WREADY=%0b WDATA=%0h WSTRB=%0h | BVALID=%0b BREADY=%0b BRESP=%0b | ARVALID=%0b ARREADY=%0b ARADDR=%0h ARPROT=%0b | RVALID=%0b RREADY=%0b RDATA=%0h RRESP=%0b",
+			  $sformatf("@%0t: ARESETn=%0b | AWVALID=%0b AWREADY=%0b AWADDR=%0h AWPROT=%0h | WVALID=%0b WREADY=%0b WDATA=%0h WSTRB=%0h | BVALID=%0b BREADY=%0b BRESP=%0h | ARVALID=%0b ARREADY=%0b ARADDR=%0h ARPROT=%0h | RVALID=%0b RREADY=%0b RDATA=%0h RRESP=%0h",
 			  $time,
 			  req.ARESETn,
 			  req.AWVALID, req.AWREADY, req.AWADDR, req.AWPROT,
@@ -67,5 +67,4 @@ class axi_monitor extends uvm_monitor;
 		end
 	endtask
 endclass
-
 

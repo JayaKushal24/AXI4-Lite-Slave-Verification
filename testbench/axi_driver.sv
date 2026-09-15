@@ -61,7 +61,9 @@ class axi_driver extends uvm_driver#(axi_seq_item);
 		rsp.BREADY=vif.drv_cb.BREADY;
 		rsp.ARVALID=vif.drv_cb.ARVALID;
 		rsp.RREADY=vif.drv_cb.RREADY;
-	
+		`uvm_info("DRIVER",$sformatf("TIME=%0t | AWADDR=%08h AWPROT=%0h AWVALID=%0b | WDATA=%08h WSTRB=%0h WVALID=%0b | BREADY=%0b | ARADDR=%08h ARPROT=%0h ARVALID=%0b | RREADY=%0b",
+            					$time,req.AWADDR, req.AWPROT, req.AWVALID,req.WDATA, req.WSTRB, req.WVALID,req.BREADY,req.ARADDR, req.ARPROT, req.ARVALID,req.RREADY),UVM_LOW)
+
 	endtask
 	
 	/* task drive(axi_seq_item req);
