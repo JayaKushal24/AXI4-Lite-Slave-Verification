@@ -33,67 +33,93 @@ class axi_scoreboard extends uvm_scoreboard;
             compare(exp,t2);
         end
     endtask
-
-    task reference_model(axi_seq_item t1);
+	reg bvalid_state;
+	reg [1:0] bresp_state;
+	reg rvalid_state;
+	reg [DATA_WIDTH-1:0] rdata_state;
+	reg [1:0] rresp_state;
+	task reference_model(axi_seq_item t1);
 		exp.copy(t1);
-        if (!t1.ARESETn) begin
-            wr_addr='0;
-            wr_data='0;
-            wr_strb='0;
-            aw_received=0;
-            w_received=0;
-            exp.BRESP=2'b00;
-            exp.RDATA='0;
-            exp.RRESP=2'b00;
-            for (int i=0;i<16;i++)mem[i]='0;
-            return;
-        end
-
-        if (t1.AWVALID && t1.AWREADY) begin
-            wr_addr=t1.AWADDR;
-            aw_received=1;
-        end
-
-        if (t1.WVALID && t1.WREADY) begin
-            wr_data=t1.WDATA;
-            wr_strb=t1.WSTRB;
-            w_received=1;
-        end
-
-        if (aw_received && w_received) begin
-            if (wr_addr>8'h3C)exp.BRESP=2'b11;
-            else if ((wr_addr>=8'h28)&&(wr_addr<=8'h30))exp.BRESP=2'b10;
-            else if (wr_addr[1:0]!=2'b00)exp.BRESP=2'b10;
-            else begin
-                exp.BRESP=2'b00;
-                if (wr_strb[0])mem[wr_addr[5:2]][0]=wr_data[7:0];
-                if (wr_strb[1])mem[wr_addr[5:2]][1]=wr_data[15:8];
-                if (wr_strb[2])mem[wr_addr[5:2]][2]=wr_data[23:16];
-                if (wr_strb[3])mem[wr_addr[5:2]][3]=wr_data[31:24];
-            end
-            aw_received=0;
-            w_received=0;
-        end
-
-        if (t1.ARVALID && t1.ARREADY) begin
-            if (t1.ARADDR>8'h3C) begin
-                exp.RDATA='0;
-                exp.RRESP=2'b11;
-            end
-            else if (t1.ARADDR[1:0]!=2'b00) begin
-                exp.RDATA='0;
-                exp.RRESP=2'b10;
-            end
-            else if ((t1.ARADDR>=8'h34)&&(t1.ARADDR<=8'h38)) begin
-                exp.RDATA='0;
-                exp.RRESP=2'b10;
-            end
-            else begin
-                exp.RDATA=mem[t1.ARADDR[5:2]];
-                exp.RRESP=2'b00;
-            end
-        end
-    endtask
+		if(!t1.ARESETn)begin
+			wr_addr='0;
+			wr_data='0;
+			wr_strb='0;
+			aw_received=0;
+			w_received=0;
+			bvalid_state=0;
+			bresp_state=2'b00;
+			rvalid_state=0;
+			rdata_state='0;
+			rresp_state=2'b00;
+			for(int i=0;i<16;i++)
+				mem[i]='0;
+			exp.BVALID=0;
+			exp.BRESP=2'b00;
+			exp.RVALID=0;
+			exp.RDATA='0;
+			exp.RRESP=2'b00;
+			return;
+		end
+		if(t1.AWVALID&&t1.AWREADY)begin
+			wr_addr=t1.AWADDR;
+			aw_received=1;
+		end
+		if(t1.WVALID&&t1.WREADY)begin
+			wr_data=t1.WDATA;
+			wr_strb=t1.WSTRB;
+			w_received=1;
+		end
+		if(aw_received&&w_received&&!bvalid_state)begin
+			if(wr_addr>=8'h40)
+				bresp_state=2'b11;
+			else if((wr_addr>=8'h28)&&(wr_addr<=8'h30))
+				bresp_state=2'b10;
+			else if(wr_addr[1:0]!=2'b00)
+				bresp_state=2'b10;
+			else begin
+				bresp_state=2'b00;
+			if(wr_strb[0])
+			mem[wr_addr[5:2]][0]=wr_data[7:0];
+			if(wr_strb[1])
+			mem[wr_addr[5:2]][1]=wr_data[15:8];
+			if(wr_strb[2])
+			mem[wr_addr[5:2]][2]=wr_data[23:16];
+			if(wr_strb[3])
+			mem[wr_addr[5:2]][3]=wr_data[31:24];
+			end
+			bvalid_state=1;
+			aw_received=0;
+			w_received=0;
+		end
+		if(bvalid_state&&t1.BREADY)
+			bvalid_state=0;
+		if(t1.ARVALID&&t1.ARREADY&&!rvalid_state)begin
+			if(t1.ARADDR>=8'h40)begin
+				rdata_state='0;
+				rresp_state=2'b11;
+			end
+			else if(t1.ARADDR[1:0]!=2'b00)begin
+				rdata_state='0;
+				rresp_state=2'b10;
+			end
+			else if((t1.ARADDR>=8'h34)&&(t1.ARADDR<=8'h38))begin
+				rdata_state='0;
+				rresp_state=2'b10;
+			end
+			else begin
+				rdata_state=mem[t1.ARADDR[5:2]];
+				rresp_state=2'b00;
+			end
+			rvalid_state=1;
+		end
+		if(rvalid_state&&t1.RREADY)
+			rvalid_state=0;
+		exp.BVALID=bvalid_state;
+		exp.BRESP=bresp_state;
+		exp.RVALID=rvalid_state;
+		exp.RDATA=rdata_state;
+		exp.RRESP=rresp_state;
+	endtask
 
 	task compare(axi_seq_item exp,axi_seq_item act);
 		bit pass;
@@ -128,3 +154,4 @@ class axi_scoreboard extends uvm_scoreboard;
     endfunction
 
 endclass
+
