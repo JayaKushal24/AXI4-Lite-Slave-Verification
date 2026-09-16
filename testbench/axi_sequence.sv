@@ -69,7 +69,7 @@ class axi_aw_before_w_sequence extends axi_base_sequence;
 endclass
 
 
-//4
+/* //4
 class axi_w_before_aw_sequence extends axi_base_sequence;
 	`uvm_object_utils(axi_w_before_aw_sequence)
 	function new(string name="axi_w_before_aw_sequence");
@@ -127,8 +127,106 @@ class axi_w_before_aw_sequence extends axi_base_sequence;
 			end
 		end
 	endtask
-endclass
+endclass */
 
+// 4
+class axi_w_before_aw_sequence extends axi_base_sequence;
+	`uvm_object_utils(axi_w_before_aw_sequence)
+	function new(string name = "axi_w_before_aw_sequence");
+		super.new(name);
+	endfunction
+	task body();
+		axi_seq_item req, rsp;
+		bit reset_seen;
+		req = axi_seq_item::type_id::create("req");
+		`uvm_info(get_type_name(),"Testing W handshake before AW handshake",UVM_LOW)
+		repeat(100) begin
+			reset_seen = 0;
+			start_item(req);
+			assert(req.randomize(AWVALID, WVALID, WDATA, WSTRB, BREADY)with {
+					AWVALID == 0;WVALID  == 1;BREADY  == 0;
+				});
+			finish_item(req);
+			get_response(rsp);
+
+			while (!(rsp.WVALID && rsp.WREADY)) begin
+				if (!rsp.ARESETn) begin
+					reset_seen = 1;
+					`uvm_info(get_type_name(),"Reset detected while waiting for W handshake",UVM_LOW)
+					break;
+				end
+				start_item(req);
+				req.AWVALID = 0;req.WVALID  = 1;req.BREADY  = 0;
+				finish_item(req);
+				get_response(rsp);
+			end
+
+			//if reset occurred,abandon this transaction
+			if (reset_seen)
+				continue;
+
+			repeat(wait_cycles) begin
+				start_item(req);
+				req.AWVALID = 0;req.WVALID  = 0;req.BREADY  = 0;
+				finish_item(req);
+				get_response(rsp);
+				if (!rsp.ARESETn) begin
+					reset_seen = 1;
+					`uvm_info(get_type_name(),"Reset detected during wait between W and AW",UVM_LOW)
+					break;
+				end
+			end
+
+			if (reset_seen)
+				continue;
+			start_item(req);
+			assert(req.randomize(AWVALID, WVALID, BREADY,AWADDR, AWPROT)with {
+					AWVALID == 1;WVALID  == 0;BREADY  == 0;
+					AWADDR dist {[8'h00:8'h27] :/ 40,[8'h28:8'h33] :/ 15,[8'h34:8'h3B] :/ 20,[8'h3C:8'h3F] :/ 20,[8'h40:8'hFF] :/ 15};
+					AWADDR[1:0] dist {2'b00       := 80,[2'b01:2'b11] := 20};
+				});
+			finish_item(req);
+			get_response(rsp);
+
+			while (!(rsp.AWVALID && rsp.AWREADY)) begin
+				if (!rsp.ARESETn) begin
+					reset_seen = 1;
+					`uvm_info(get_type_name(),"Reset detected while waiting for AW handshake",UVM_LOW)
+					break;
+				end
+				start_item(req);
+				req.AWVALID = 1;req.WVALID  = 0;req.BREADY  = 0;
+				finish_item(req);
+				get_response(rsp);
+			end
+			if (reset_seen)
+				continue;
+			start_item(req);
+			assert(req.randomize(AWVALID, WVALID, BREADY)with {AWVALID == 0;WVALID  == 0;BREADY  == 1;});
+			finish_item(req);
+			get_response(rsp);
+
+			while (!(rsp.BVALID && rsp.BREADY)) begin
+				if (!rsp.ARESETn) begin
+					reset_seen = 1;
+					`uvm_info(get_type_name(),"Reset detected while waiting for B handshake",UVM_LOW)
+					break;
+				end
+				start_item(req);
+				req.AWVALID = 0;
+				req.WVALID  = 0;
+				req.BREADY  = 1;
+				finish_item(req);
+				get_response(rsp);
+			end
+			if (reset_seen) begin
+				`uvm_info(get_type_name(),"Transaction abandoned due to reset",UVM_LOW)
+				continue;
+			end
+			`uvm_info(get_type_name(),"W-before-AW transaction completed",UVM_LOW)
+		end
+	endtask
+endclass
 
 //5
 class axi_rd_sequence extends axi_base_sequence;
@@ -1039,3 +1137,4 @@ class axi_random_sequence extends axi_base_sequence;
 		end
 	endtask
 endclass
+

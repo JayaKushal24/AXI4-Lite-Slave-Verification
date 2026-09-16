@@ -123,4 +123,18 @@ class axi_subscriber extends uvm_subscriber #(axi_seq_item);
 		if (trans.RVALID&&trans.RREADY) r_cg.sample();
 		if (trans.AWVALID||trans.WVALID||trans.BVALID||trans.ARVALID||trans.RVALID) backpressure_cg.sample();
 	endfunction
+	function void report_phase(uvm_phase phase);
+	        `uvm_info(get_type_name(),
+	        $sformatf("\n========== AXI COVERAGE ==========\n\
+		AW Coverage          : %0.2f%%\n\
+		W Coverage           : %0.2f%%\n\
+		B Coverage           : %0.2f%%\n\
+		AR Coverage          : %0.2f%%\n\
+		R Coverage           : %0.2f%%\n\
+		Backpressure Coverage: %0.2f%%\n\
+		===================================",
+        	//aw_cg.get_inst_coverage(),w_cg.get_inst_coverage(),b_cg.get_inst_coverage(),ar_cg.get_inst_coverage(),r_cg.get_inst_coverage(),backpressure_cg.get_inst_coverage()),UVM_NONE)
+		aw_cg.get_coverage(),w_cg.get_coverage(),b_cg.get_coverage(),ar_cg.get_coverage(),r_cg.get_coverage(),backpressure_cg.get_coverage()),UVM_NONE)
+	endfunction
 endclass
+

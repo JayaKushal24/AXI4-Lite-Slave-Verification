@@ -132,6 +132,9 @@ class axi_scoreboard extends uvm_scoreboard;
 			if ((act.RDATA!==exp.RDATA)||(act.RRESP!==exp.RRESP))
 				pass=0;
 		end
+		if (!exp.ARESETn && ((act.BVALID !== 1'b0) || (act.BRESP !== 2'b00) || (act.RVALID !== 1'b0) || (act.RDATA !== '0) || (act.RRESP !== 2'b00))) 
+			pass = 0;
+		
 		if (pass) begin
 			pass_count++;
 			$display("PASSED");

@@ -22,9 +22,13 @@ class axi_monitor extends uvm_monitor;
 	task run_phase(uvm_phase phase);
 		axi_seq_item req;
 		//@(vif.mon_cb);
-		if(cfg.is_active==UVM_PASSIVE)
+		if(cfg.is_active==UVM_PASSIVE)begin
+			`uvm_info(get_type_name(),"setting up PASSIVE_MON",UVM_MEDIUM)
 			@(vif.mon_cb);
-
+		end
+		else begin
+			`uvm_info(get_type_name(),"setting up ACTIVE_MON",UVM_MEDIUM)
+		end
 		forever begin
 			@(vif.mon_cb);
 			req = axi_seq_item::type_id::create("req");
@@ -54,7 +58,8 @@ class axi_monitor extends uvm_monitor;
 			req.RDATA  = vif.mon_cb.RDATA;
 			req.RRESP  = vif.mon_cb.RRESP;
 			ap.write(req);
-			`uvm_info(get_full_name(),
+
+/*			`uvm_info(get_full_name(),
 			  $sformatf("@%0t: ARESETn=%0b | AWVALID=%0b AWREADY=%0b AWADDR=%0h AWPROT=%0h | WVALID=%0b WREADY=%0b WDATA=%0h WSTRB=%0h | BVALID=%0b BREADY=%0b BRESP=%0h | ARVALID=%0b ARREADY=%0b ARADDR=%0h ARPROT=%0h | RVALID=%0b RREADY=%0b RDATA=%0h RRESP=%0h",
 			  $time,
 			  req.ARESETn,
@@ -63,7 +68,18 @@ class axi_monitor extends uvm_monitor;
 			  req.BVALID, req.BREADY, req.BRESP,
 			  req.ARVALID, req.ARREADY, req.ARADDR, req.ARPROT,
 			  req.RVALID, req.RREADY, req.RDATA, req.RRESP),
-			  UVM_MEDIUM)
+			  UVM_LOW)
+*/
+			if(cfg.is_active == UVM_ACTIVE) begin
+			     `uvm_info(get_full_name(),
+			      $sformatf("@%0t ACTIVE MON | INPUTS | ARESETn=%0b | AWVALID=%0b AWADDR=%0h AWPROT=%0h | WVALID=%0b WDATA=%0h WSTRB=%0h | BREADY=%0b | ARVALID=%0b ARADDR=%0h ARPROT=%0h | RREADY=%0b",
+			      $time, req.ARESETn,req.AWVALID, req.AWADDR, req.AWPROT,req.WVALID, req.WDATA, req.WSTRB, req.BREADY,req.ARVALID, req.ARADDR, req.ARPROT, req.RREADY),UVM_LOW)
+			end
+			else begin
+			     `uvm_info(get_full_name(),
+			      $sformatf("@%0t PASSIVE MON | OUTPUTS | AWREADY=%0b | WREADY=%0b | BVALID=%0b BRESP=%0h | ARREADY=%0b | RVALID=%0b RDATA=%0h RRESP=%0h",
+			      $time,req.AWREADY, req.WREADY,req.BVALID, req.BRESP,req.ARREADY,req.RVALID, req.RDATA, req.RRESP),UVM_LOW)
+			end
 		end
 	endtask
 endclass

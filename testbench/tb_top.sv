@@ -44,14 +44,16 @@ module tb_top;
         repeat(5) @(posedge ACLK);
         axi_if.ARESETn = 1;
         `uvm_info("TB_TOP","INITIAL Reset Deasserted",UVM_LOW);
-//        repeat(50) @(posedge ACLK);
-  //              dut_reset();
+        //repeat(40) @(posedge ACLK);
+        //dut_reset();
     end
 
         task dut_reset();
+        `uvm_info("TB_TOP","------------------------------------------------------MID Reset ASSERTED-------------------------------------------------------",UVM_LOW);
                 axi_if.ARESETn = 0;
-                repeat(3) @(posedge ACLK);
-        axi_if.ARESETn = 1;
+                repeat(10) @(posedge ACLK);
+        	axi_if.ARESETn = 1;
+        `uvm_info("TB_TOP","------------------------------------------------------MID  Reset DEASSERTED-------------------------------------------------------",UVM_LOW);
         endtask
 
     initial begin
