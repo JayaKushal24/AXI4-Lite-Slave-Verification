@@ -747,30 +747,30 @@ endclass
 
 
 //12
-class axi_invalid_write_sequence extends axi_base_sequence;//decoder error
+class axi_invalid_write_sequence extends axi_base_sequence;
 	`uvm_object_utils(axi_invalid_write_sequence)
 	function new(string name="axi_invalid_write_sequence");
-	super.new(name);
+		super.new(name);
 	endfunction
 	task body();
 		axi_seq_item req,rsp;
 		req=axi_seq_item::type_id::create("req");
-		repeat(100) begin
+		for(int addr=8'h40;addr<=8'hFC;addr=addr+4) begin
 			start_item(req);
 			assert(req.randomize(AWADDR,AWPROT,AWVALID,WVALID,BREADY,WDATA,WSTRB)with{
-				AWVALID==1;WVALID==0;BREADY==0;AWADDR inside{[8'h40:8'hFC]};AWADDR[1:0]==2'b00;}
-			);
+				AWADDR==addr;AWVALID==1;WVALID==0;BREADY==0;WDATA==32'h12345678;WSTRB==4'hF;
+			});
 			finish_item(req);
 			get_response(rsp);
 			while(!(rsp.AWVALID&&rsp.AWREADY)) begin
 				start_item(req);
-				req.AWVALID=1;req.WVALID=0;req.BREADY=0;
+				req.AWADDR=addr;req.AWVALID=1;req.WVALID=0;req.BREADY=0;
 				finish_item(req);
 				get_response(rsp);
 			end
 
 			start_item(req);
-			req.AWVALID=0;req.WVALID=1;req.BREADY=0;
+			req.AWVALID=0;req.WVALID=1;req.BREADY=0;req.WDATA=32'h12345678;req.WSTRB=4'hF;
 			finish_item(req);
 			get_response(rsp);
 			while(!(rsp.WVALID&&rsp.WREADY)) begin
@@ -787,6 +787,32 @@ class axi_invalid_write_sequence extends axi_base_sequence;//decoder error
 			while(!(rsp.BVALID&&rsp.BREADY)) begin
 				start_item(req);
 				req.AWVALID=0;req.WVALID=0;req.BREADY=1;
+				finish_item(req);
+				get_response(rsp);
+			end
+		end
+
+		for(int addr=8'h00;addr<=8'h3C;addr=addr+4) begin
+			start_item(req);
+			assert(req.randomize(ARADDR,ARPROT,ARVALID,RREADY)with{
+				ARADDR==addr;ARVALID==1;RREADY==0;
+			});
+			finish_item(req);
+			get_response(rsp);
+			while(!(rsp.ARVALID&&rsp.ARREADY)) begin
+				start_item(req);
+				req.ARADDR=addr;req.ARVALID=1;req.RREADY=0;
+				finish_item(req);
+				get_response(rsp);
+			end
+
+			start_item(req);
+			req.ARVALID=0;req.RREADY=1;
+			finish_item(req);
+			get_response(rsp);
+			while(!(rsp.RVALID&&rsp.RREADY)) begin
+				start_item(req);
+				req.ARVALID=0;req.RREADY=1;
 				finish_item(req);
 				get_response(rsp);
 			end
@@ -1137,4 +1163,3 @@ class axi_random_sequence extends axi_base_sequence;
 		end
 	endtask
 endclass
-

@@ -211,10 +211,13 @@ class axi_invalid_write_test extends axi_base_test;
 		super.new(name,parent);
 	endfunction
 	task run_phase(uvm_phase phase);
-		axi_invalid_write_sequence seq;
+		axi_w_before_aw_sequence valid_seq;
+		axi_invalid_write_sequence invalid_seq;
 		phase.raise_objection(this);
-		seq=axi_invalid_write_sequence::type_id::create("seq");
-		seq.start(env.active_agent.seqr);
+        valid_seq = axi_w_before_aw_sequence::type_id::create("valid_seq");
+        valid_seq.start(env.active_agent.seqr);
+		invalid_seq=axi_invalid_write_sequence::type_id::create("invalid_seq");
+		invalid_seq.start(env.active_agent.seqr);
 		phase.drop_objection(this);
 	endtask
 endclass
